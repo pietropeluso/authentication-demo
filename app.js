@@ -33,7 +33,9 @@ app.use(sessions({
   cookieName: "session",
   secret: "dfjsahigewiruhw39jfg9sif4215qweffq398f93f9qhf",
   duration: 30 * 60 * 1000, //30 minutes
-  activeDuration: 5 * 60 * 1000
+  activeDuration: 5 * 60 * 1000,
+  ephemeral: true,  // delete the cookie when the browser is closed
+  httpOnly: true  // cookies are not accessible by browser javascript
 }));
 
 app.use(function(req, res, next) {  //custom middleware, this will be executed at first
