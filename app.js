@@ -5,16 +5,7 @@ var bcryptjs = require("bcryptjs");
 var sessions = require("client-sessions");
 var csrf = require("csurf");
 
-var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
-
-var User = mongoose.model("User", new Schema({
-  id: ObjectId,
-  firstName: String,
-  lastName: String,
-  email: {type: String, unique: true},
-  password: String
-}));
+var User = require('./api/user/user.model');
 
 var app = express();
 
