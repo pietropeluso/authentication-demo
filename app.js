@@ -1,5 +1,17 @@
 var express = require("express");
 var bodyParser = require("body-parser");
+var mongoose = require("mongoose");
+
+var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
+
+var User = mongoose.model("User", new Schema({
+  id: ObjectId,
+  firstName: String,
+  lastName: String,
+  email: {type: String, unique: true},
+  password: String
+}));
 
 var app = express();
 
@@ -7,6 +19,9 @@ var app = express();
 app.set("view engine", "jade");
 app.set("port", process.env.PORT || 1337);
 app.locals.pretty = true; // disable html minifying by Jade
+
+// database connection
+mongoose.connect('mongodb://localhost/auth');
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended : true }));
@@ -18,6 +33,29 @@ app.get("/", function(req, res){
 
 app.get("/register", function(req, res){
   res.render("register.jade");
+});
+
+app.post("/register", function(req, res) {
+  // create an instance of the model
+  var user = new User({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    password: req.body.password
+  });
+
+  user.save(function(err) {
+    if (err) {
+      var msg = "Can't save the user to the database";
+      if (err.code === 11000) {
+        msg = "The email address provided is already used, please choose another one";
+      }
+      res.render("register.jade", {error: error});
+    } else {
+      res.redirect("/dashboard");
+    }
+
+  });
 });
 
 app.get("/login", function(req, res){
