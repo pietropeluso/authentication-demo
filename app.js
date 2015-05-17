@@ -62,6 +62,20 @@ app.get("/login", function(req, res){
   res.render("login.jade");
 });
 
+app.post("/login", function(req, res) {
+  User.findOne({ email: req.body.email }, function(err, user){
+    if (!user) {
+      res.render("login.jade", { error: "Invalid email provided" });
+    } else {
+      if (user.password === req.body.password) {
+        res.redirect("/dashboard");
+      } else {
+        res.render("login.jade", { error: "Invalid password provided" });
+      }
+    }
+  });
+});
+
 app.get("/dashboard", function(req, res){
   res.render("dashboard.jade");
 });
