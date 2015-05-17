@@ -3,6 +3,7 @@ var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var bcryptjs = require("bcryptjs");
 var sessions = require("client-sessions");
+var csrf = require("csurf");
 
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
@@ -27,6 +28,7 @@ mongoose.connect('mongodb://localhost/auth');
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended : true }));
+app.use(csrf());
 app.use(sessions({
   cookieName: "session",
   secret: "dfjsahigewiruhw39jfg9sif4215qweffq398f93f9qhf",
@@ -65,7 +67,7 @@ app.get("/", function(req, res){
 });
 
 app.get("/register", function(req, res){
-  res.render("register.jade");
+  res.render("register.jade", { csrfToken: req.csrfToken() });
 });
 
 app.post("/register", function(req, res) {
@@ -95,7 +97,7 @@ app.post("/register", function(req, res) {
 });
 
 app.get("/login", function(req, res){
-  res.render("login.jade");
+  res.render("login.jade", { csrfToken: req.csrfToken() });
 });
 
 app.post("/login", function(req, res) {
