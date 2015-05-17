@@ -86,7 +86,7 @@ app.post("/register", function(req, res) {
       if (err.code === 11000) {
         msg = "The email address provided is already used, please choose another one";
       }
-      res.render("register.jade", {error: error});
+      res.render("register.jade", {error: msg});
     } else {
       res.redirect("/dashboard");
     }
