@@ -28,7 +28,6 @@ mongoose.connect('mongodb://localhost/auth');
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended : true }));
-app.use(csrf());
 app.use(sessions({
   cookieName: "session",
   secret: "dfjsahigewiruhw39jfg9sif4215qweffq398f93f9qhf",
@@ -37,6 +36,7 @@ app.use(sessions({
   ephemeral: true,  // delete the cookie when the browser is closed
   httpOnly: true  // cookies are not accessible by browser javascript
 }));
+app.use(csrf());
 
 app.use(function(req, res, next) {  //custom middleware, this will be executed at first
   if (req.session && req.session.user) {
@@ -122,7 +122,9 @@ app.get("/dashboard", requireLogin, function(req, res){
 });
 
 app.get("/logout", function(req, res){
-  req.session.reset();
+  if (req.session) {
+    req.session.reset();
+  }
   res.redirect("/");
 });
 
