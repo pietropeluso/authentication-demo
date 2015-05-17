@@ -1,12 +1,15 @@
 var express = require("express");
+var bodyParser = require("body-parser");
 
 var app = express();
 
 // all environments
 app.set("view engine", "jade");
 app.set("port", process.env.PORT || 1337);
-
 app.locals.pretty = true; // disable html minifying by Jade
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended : true }));
 
 // Routes
 app.get("/", function(req, res){
