@@ -1,6 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
+var bcryptjs = require("bcryptjs");
 var sessions = require("client-sessions");
 
 var Schema = mongoose.Schema;
@@ -43,12 +44,15 @@ app.get("/register", function(req, res){
 });
 
 app.post("/register", function(req, res) {
+  // create a hash from the user password
+  var hash = bcryptjs.hashSync(req.body.password, bcryptjs.genSaltSync(10));
+
   // create an instance of the model
   var user = new User({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
-    password: req.body.password
+    password: hash
   });
 
   user.save(function(err) {
@@ -74,7 +78,7 @@ app.post("/login", function(req, res) {
     if (!user) {
       res.render("login.jade", { error: "Invalid email provided" });
     } else {
-      if (user.password === req.body.password) {
+      if (bcryptjs.compareSync(req.body.password, user.password)) {
         req.session.user = user;  // setting a session cookie for the logged in user
         res.redirect("/dashboard");
       } else {
