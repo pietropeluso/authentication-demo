@@ -20,8 +20,8 @@ var app = express();
 
 // all environments
 app.set("view engine", "jade");
-app.set("port", process.env.PORT || 1337);
 app.locals.pretty = true; // disable html minifying by Jade
+app.set("port", process.env.PORT || 1337);
 
 // database connection
 mongoose.connect('mongodb://localhost/auth');
@@ -36,6 +36,7 @@ app.use(sessions({
   ephemeral: true,  // delete the cookie when the browser is closed
   httpOnly: true  // cookies are not accessible by browser javascript
 }));
+
 app.use(csrf());
 
 app.use(function(req, res, next) {  //custom middleware, this will be executed at first
@@ -92,6 +93,11 @@ app.post("/register", function(req, res) {
       }
       res.render("register.jade", {error: msg});
     } else {
+      req.user = user;
+      delete req.user.password; //make the password unavailable, even if it's encrypted
+      req.session.user = req.user;
+      res.locals.user = req.user;
+
       res.redirect("/dashboard");
     }
 
@@ -129,5 +135,5 @@ app.get("/logout", function(req, res){
 });
 
 app.listen(app.get('port'), function(){
-  console.log("Web server listening on: 127.0.0.1:" + app.get('port'));
+  console.log("Web server listening on port " + app.get('port'));
 })
