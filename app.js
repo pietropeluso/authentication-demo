@@ -6,6 +6,7 @@ var sessions = require("client-sessions");
 var csrf = require("csurf");
 
 var User = require('./api/user/user.model');
+var utils = require('./utilities');
 
 var app = express();
 
@@ -34,10 +35,7 @@ app.use(function(req, res, next) {  //custom middleware, this will be executed a
   if (req.session && req.session.user) {
     User.findOne({ email: req.session.user.email}, function(err, user) {
       if (user) {
-        req.user = user;
-        delete req.user.password; //make the password unavailable, even if it's encrypted
-        req.session.user = req.user;
-        res.locals.user = req.user;
+        utils.createUserSession(req, res, user);
       }
       next();
     });
@@ -84,11 +82,7 @@ app.post("/register", function(req, res) {
       }
       res.render("register.jade", {error: msg});
     } else {
-      req.user = user;
-      delete req.user.password; //make the password unavailable, even if it's encrypted
-      req.session.user = req.user;
-      res.locals.user = req.user;
-
+      utils.createUserSession(req, res, user);
       res.redirect("/dashboard");
     }
 
