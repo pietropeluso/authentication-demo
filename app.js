@@ -34,6 +34,31 @@ app.use(sessions({
   activeDuration: 5 * 60 * 1000
 }));
 
+app.use(function(req, res, next) {  //custom middleware, this will be executed at first
+  if (req.session && req.session.user) {
+    User.findOne({ email: req.session.user.email}, function(err, user) {
+      if (user) {
+        req.user = user;
+        delete req.user.password; //make the password unavailable, even if it's encrypted
+        req.session.user = req.user;
+        res.locals.user = req.user;
+      }
+      next();
+    });
+  } else {
+    // no session information
+    next();
+  }
+});
+
+function requireLogin(req, res, next) {
+  if (!req.user) {
+    res.redirect("/login");
+  } else {
+    next();
+  }
+}
+
 // Routes
 app.get("/", function(req, res){
   res.render("index.jade");
@@ -88,20 +113,8 @@ app.post("/login", function(req, res) {
   });
 });
 
-app.get("/dashboard", function(req, res){
-  if (req.session && req.session.user) {
-    User.findOne({ email: req.session.user.email }, function(err, user) {
-      if (!user) {
-        req.session.reset();
-        res.redirect("/login");
-      } else {
-        res.locals.user = user;
-        res.render("dashboard.jade");
-      }
-    });
-  } else {
-    res.redirect("/login");
-  }
+app.get("/dashboard", requireLogin, function(req, res){
+  res.render("dashboard.jade");
 });
 
 app.get("/logout", function(req, res){
